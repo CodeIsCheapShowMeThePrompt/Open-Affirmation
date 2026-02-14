@@ -24,8 +24,7 @@ if st.button("Classify"):
         st.write("Debug - Type:", type(raw_results))
 
         # 获取结果列表
-        results = raw_results[0] if isinstance(raw_results, list) else
-raw_results
+        results = raw_results[0] if isinstance(raw_results, list) else raw_results
 
         # Display the classification result
         max_score = float('-inf')
