@@ -1,4 +1,5 @@
 import streamlit as st
+import transformers
 from transformers import pipeline
 
 # Load the text classification model pipeline
