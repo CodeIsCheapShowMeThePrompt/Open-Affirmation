@@ -1,4 +1,4 @@
-import streamlit as st                                                        
+import streamlit as st
 from transformers import pipeline
 
 # Load the text classification model pipeline
@@ -15,30 +15,44 @@ text = st.text_area("Enter the text to classify", "")
 
 # Perform text classification when the user clicks the "Classify" button
 if st.button("Classify"):
-    if text.strip():  # 检查文本不为空
+    if text.strip():
         # Perform text classification on the input text
         raw_results = classifier(text)
 
-        # 调试：查看实际返回的数据结构
-        st.write("Debug - Raw results:", raw_results)
-        st.write("Debug - Type:", type(raw_results))
-
-        # 获取结果列表
-        results = raw_results[0] if isinstance(raw_results, list) else raw_results
+        # 处理结果：检查是否需要取第一个元素
+        if isinstance(raw_results, list) and len(raw_results) > 0:
+            # 检查第一个元素是列表还是字典
+            if isinstance(raw_results[0], list):
+                # 结构是 [[{}, {}, ...]]
+                results = raw_results[0]
+            elif isinstance(raw_results[0], dict):
+                # 结构是 [{}, {}, ...]
+                results = raw_results
+            else:
+                st.error("Unexpected result format")
+                results = []
+        else:
+            results = []
 
         # Display the classification result
-        max_score = float('-inf')
-        max_label = ''
+        if results:
+            max_score = float('-inf')
+            max_label = ''
 
-        for result in results:
-            if isinstance(result, dict) and 'score' in result:
+            for result in results:
                 if result['score'] > max_score:
                     max_score = result['score']
                     max_label = result['label']
 
-        st.write("Text:", text)
-        st.write("Label:", max_label)
-        st.write("Score:", max_score)
+            st.write("Text:", text)
+            st.write("Label:", max_label)
+            st.write("Score:", f"{max_score:.4f}")
+
+            # 显示所有情感的分数
+            st.write("\nAll scores:")
+            for result in results:
+                st.write(f"- {result['label']}: {result['score']:.4f}")
+        else:
+            st.error("No results returned")
     else:
         st.warning("Please enter some text to classify")
-
